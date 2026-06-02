@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plotly Chart Demo</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #333; }
+        #chart { width: 100%; max-width: 800px; }
+    </style>
+</head>
+<body>
+    <h1>Plotly Chart Demo</h1>
+    <div id="chart"></div>
+    
+    <script>
+        var chartData = {{ chart_json | safe }};
+        Plotly.newPlot('chart', chartData.data, chartData.layout);
+    </script>
+    
+    <p><a href="/">Back to home</a></p>
+</body>
+</html>
