@@ -1,0 +1,5 @@
+Linux local machine word list:
+/usr/share/dict/words
+/usr/share/dict/linux.words
+
+
