@@ -6,6 +6,10 @@ def highest_and_lowest(numbers):
 	return ' '.join([str(max(ls)), str(min(ls))])
 
 
+def highest_and_lowest2(numbers):
+	nums = sorted([int(n) for n in numbers.split()])
+	return f'{nums[-1]} {nums[0]}'
+
 if __name__ == '__main__':
 	test_cases = [
 		"1 2 3 4 5",
@@ -15,3 +19,6 @@ if __name__ == '__main__':
 	]
 	for tc in test_cases:
 		show_call(highest_and_lowest, tc)
+	print()
+	for tc in test_cases:
+		show_call(highest_and_lowest2, tc)
