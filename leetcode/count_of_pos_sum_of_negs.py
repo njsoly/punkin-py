@@ -11,5 +11,6 @@ def count_pos_sum_negs(my_list):
 	return [pos, sum_of_negs]
 
 
-test_set = [11, -12, 50, -40, 2]
-print('count_pos_sum_negs(', test_set, ') = ', count_pos_sum_negs(test_set))
+if __name__ == '__main__':
+	test_set = [11, -12, 50, -40, 2]
+	print('count_pos_sum_negs(', test_set, ') = ', count_pos_sum_negs(test_set))
