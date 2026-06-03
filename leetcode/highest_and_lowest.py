@@ -7,7 +7,11 @@ def highest_and_lowest(numbers):
 
 
 if __name__ == '__main__':
-	show_call(highest_and_lowest, "1 2 3 4 5")
-	show_call(highest_and_lowest, "1 2 -3 4 5")
-	show_call(highest_and_lowest, "1 9 3 4 -5")
-	show_call(highest_and_lowest, "8 3 -5 42 -1 0 0 -9 4 7 4 -4")
+	test_cases = [
+		"1 2 3 4 5",
+		"1 2 -3 4 5",
+		"1 9 3 4 -5",
+		"8 3 -5 42 -1 0 0 -9 4 7 4 -4",
+	]
+	for tc in test_cases:
+		show_call(highest_and_lowest, tc)
