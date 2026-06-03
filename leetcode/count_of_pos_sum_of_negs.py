@@ -1,4 +1,6 @@
 def count_pos_sum_negs(my_list):
+	if not my_list: return []
+	
 	pos, sum_of_negs = 0, 0
 	for n in my_list:
 		if n > 0:
