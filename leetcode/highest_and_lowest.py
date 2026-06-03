@@ -1,6 +1,9 @@
 from leetcode.tester import show_call
 
 
+# https://www.codewars.com/kata/554b4ac871d6813a03000035/train/python
+
+
 def highest_and_lowest(numbers):
 	ls = list(map(int, numbers.split()))
 	return ' '.join([str(max(ls)), str(min(ls))])
