@@ -21,7 +21,17 @@ def show_call(func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
 	try:
 		result = func(*args, **kwargs)
 	except Exception as e:
-		print(f'{func.__name__}({rendered}) raised {type(e).__name__}: {e}')
+		tb = e.__traceback__
+		# Walk to the deepest frame (actual throw point)
+		last = tb
+		while last and last.tb_next:
+			last = last.tb_next
+		if last is not None:
+			frame = last.tb_frame
+			loc = f' at {frame.f_code.co_filename}:{last.tb_lineno} in {frame.f_code.co_name}'
+		else:
+			loc = ''
+		print(f'{func.__name__}({rendered}) raised {type(e).__name__}: {e}{loc}')
 		raise
 	print(f'{func.__name__}({rendered}) = {result!r}')
 	return result
