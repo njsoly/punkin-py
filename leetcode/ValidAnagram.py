@@ -45,6 +45,17 @@ class Solution:
 		if t == '':
 			return True
 		return False
+	
+	def isAnagram2(self, s: str, t: str) -> bool:
+		if np.strings.str_len(s) != np.strings.str_len(t):
+			return False
+		
+		for i in range(len(s)):
+			t = t.replace(s[i], '', 1)
+		
+		if t == '':
+			return True
+		return False
 
 
 if __name__ == '__main__':
@@ -55,10 +66,12 @@ if __name__ == '__main__':
 		(("a", "a"), True),
 		(("ab", "a"), False),
 	]
-	solutionApproaches = [Solution().isAnagram]
 	
 	solution = Solution()
-	for (s, t), expected in test_cases:
-		result = show_call(solution.isAnagram, s, t)
-		status = 'OK' if result == expected else f'FAIL (expected {expected!r})'
-		print(f'  -> {status}\n')
+	solution_approaches = [solution.isAnagram]
+	for approach in solution_approaches:
+		print(f'Approach: {approach.__name__}')
+		for (s, t), expected in test_cases:
+			result = show_call(approach, s, t)
+			status = 'OK' if result == expected else f'FAIL (expected {expected!r})'
+			print(f'  -> {status}\n')
