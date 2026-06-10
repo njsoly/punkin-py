@@ -1,8 +1,15 @@
 from leetcode.tester import show_call
 
 
+"""
+This is a very basic python problem, to get back into the swing.
+It's not actually from LeetCode, it's from CodeWars.
+"""
+
+
+# 'return a new list with the strings filtered out'
 def filter_list(l):
-	# 'return a new list with the strings filtered out'
+	# the following statement utilizes a list comprehension
 	return [o for o in l if isinstance(o, int)]
 
 

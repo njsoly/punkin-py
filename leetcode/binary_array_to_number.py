@@ -1,7 +1,13 @@
 from leetcode.tester import show_call
 
 
-# https://www.codewars.com/kata/578553c3a1b8d5c40300037c/train/python
+"""
+This is a very basic python problem, to get back into the swing.
+It's not actually from LeetCode, it's from CodeWars.
+
+https://www.codewars.com/kata/578553c3a1b8d5c40300037c/train/python
+"""
+
 
 
 def binary_array_to_number(numbers):

@@ -1,7 +1,13 @@
 from leetcode.tester import show_call
 
 
-# https://www.codewars.com/kata/554b4ac871d6813a03000035/train/python
+"""
+This is a very basic python problem, to get back into the swing.
+It's not actually from LeetCode, it's from CodeWars.
+
+https://www.codewars.com/kata/554b4ac871d6813a03000035/train/python
+"""
+
 
 
 def highest_and_lowest(numbers):
