@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from tester import show_call
+from tester import run_test_cases
 
 
 '''
@@ -129,9 +129,4 @@ if __name__ == '__main__':
 	]
 
 
-	for approach in solution_approaches:
-		print(f'Approach: {approach.__name__}')
-		for (s, t), expected in test_cases:
-			result = show_call(approach, s, t)
-			status = 'OK' if result == expected else f'FAIL (expected {expected!r})'
-			print(f'  -> {status}')
+	run_test_cases(solution_approaches, test_cases)
