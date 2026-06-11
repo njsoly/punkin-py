@@ -3,3 +3,4 @@ plotly
 python-dotenv
 requests
 numpy
+pytest>=7.0.0
