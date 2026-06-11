@@ -218,7 +218,7 @@ def interactive(args):
 
     pattern = args.regex or ''
     replacement = args.replacement or ''
-    patterns = list(args.files)
+    filePatterns = list(args.files)
 
     menu = """
 commands:
@@ -231,27 +231,41 @@ commands:
   d  dry run: full command, no writes
   w  WRITE replacements to files
   p  print current settings
+  ls list files in current directory
   q  quit
 """
     print(menu)
 
     while True:
         try:
-            choice = input('i-sed-no> ').strip().lower()
+            user_input = input('i-sed-no> ').strip()
         except (EOFError, KeyboardInterrupt):
             print()
             return 0
 
+        parts = user_input.split(maxsplit=1)
+        choice = parts[0].lower() if parts else ''
+        args_text = parts[1] if len(parts) > 1 else None
+
         if choice == 'g':
-            raw = prompt('file glob(s)', ' '.join(patterns))
-            patterns = raw.split()
+            if args_text:
+                filePatterns = args_text.split()
+            else:
+                raw = prompt('file glob(s)', ' '.join(filePatterns))
+                filePatterns = raw.split()
         elif choice == 'r':
-            pattern = prompt('regex', pattern)
+            if args_text:
+                pattern = args_text
+            else:
+                pattern = prompt('regex', pattern)
         elif choice == 's':
-            replacement = prompt('replacement', replacement)
+            if args_text:
+                replacement = args_text
+            else:
+                replacement = prompt('replacement', replacement)
         elif choice == 'f':
-            if patterns:
-                do_list_files(patterns)
+            if filePatterns:
+                do_list_files(filePatterns)
             else:
                 print('set file glob(s) first (g)')
         elif choice == 'v':
@@ -260,19 +274,32 @@ commands:
             else:
                 print('set regex first (r)')
         elif choice == 'm':
-            if pattern and patterns:
-                do_show_matches(pattern, patterns)
+            if pattern and filePatterns:
+                do_show_matches(pattern, filePatterns)
             else:
                 print('set regex (r) and file glob(s) (g) first')
         elif choice in ('d', 'w'):
-            if pattern and patterns:
-                do_replace(pattern, replacement, patterns, dry_run=(choice == 'd'))
+            if pattern and filePatterns:
+                do_replace(pattern, replacement, filePatterns, dry_run=(choice == 'd'))
             else:
                 print('set regex (r) and file glob(s) (g) first')
         elif choice == 'p':
-            print(f'  glob(s):     {" ".join(patterns) or "(unset)"}')
+            print(f'  glob(s):     {" ".join(filePatterns) or "(unset)"}')
             print(f'  regex:       {pattern or "(unset)"}')
             print(f'  replacement: {replacement or "(unset)"}')
+        elif choice == 'ls':
+            files = sorted(p.name for p in Path.cwd().iterdir() if p.is_file())
+            dirs = sorted(p.name for p in Path.cwd().iterdir() if p.is_dir())
+            if dirs:
+                print('directories:')
+                for d in dirs:
+                    print(f'  {d}/')
+            if files:
+                print('files:')
+                for f in files:
+                    print(f'  {f}')
+            if not files and not dirs:
+                print('(empty directory)')
         elif choice == 'q':
             return 0
         elif choice in ('h', '?', 'help'):
