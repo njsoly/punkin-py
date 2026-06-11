@@ -203,6 +203,86 @@ def prompt(label, current):
     return value if value else current
 
 
+def cmd_set_glob(args_text, state):
+    """Handle 'g' command: set file glob(s)."""
+    if args_text:
+        state['filePatterns'] = args_text.split()
+    else:
+        raw = prompt('file glob(s)', ' '.join(state['filePatterns']))
+        state['filePatterns'] = raw.split()
+
+
+def cmd_set_regex(args_text, state):
+    """Handle 'r' command: set regex."""
+    if args_text:
+        state['pattern'] = args_text
+    else:
+        state['pattern'] = prompt('regex', state['pattern'])
+
+
+def cmd_set_replacement(args_text, state):
+    """Handle 's' command: set replacement string."""
+    if args_text:
+        state['replacement'] = args_text
+    else:
+        state['replacement'] = prompt('replacement', state['replacement'])
+
+
+def cmd_list_files(args_text, state):
+    """Handle 'f' command: dry run list targeted files."""
+    if state['filePatterns']:
+        do_list_files(state['filePatterns'])
+    else:
+        print('set file glob(s) first (g)')
+
+
+def cmd_validate_regex(args_text, state):
+    """Handle 'v' command: dry run validate regex."""
+    if state['pattern']:
+        do_check_regex(state['pattern'])
+    else:
+        print('set regex first (r)')
+
+
+def cmd_show_matches(args_text, state):
+    """Handle 'm' command: dry run show matches."""
+    if state['pattern'] and state['filePatterns']:
+        do_show_matches(state['pattern'], state['filePatterns'])
+    else:
+        print('set regex (r) and file glob(s) (g) first')
+
+
+def cmd_replace(args_text, state, dry_run=True):
+    """Handle 'd' and 'w' commands: dry run or write replacements."""
+    if state['pattern'] and state['filePatterns']:
+        do_replace(state['pattern'], state['replacement'], state['filePatterns'], dry_run=dry_run)
+    else:
+        print('set regex (r) and file glob(s) (g) first')
+
+
+def cmd_print_settings(args_text, state):
+    """Handle 'p' command: print current settings."""
+    print(f'  glob(s):     {" ".join(state["filePatterns"]) or "(unset)"}')
+    print(f'  regex:       {state["pattern"] or "(unset)"}')
+    print(f'  replacement: {state["replacement"] or "(unset)"}')
+
+
+def cmd_list_directory(args_text, state):
+    """Handle 'ls' command: list files in current directory."""
+    files = sorted(p.name for p in Path.cwd().iterdir() if p.is_file())
+    dirs = sorted(p.name for p in Path.cwd().iterdir() if p.is_dir())
+    if dirs:
+        print('directories:')
+        for d in dirs:
+            print(f'  {d}/')
+    if files:
+        print('files:')
+        for f in files:
+            print(f'  {f}')
+    if not files and not dirs:
+        print('(empty directory)')
+
+
 def interactive(args):
     print(TAGLINE)
     
@@ -216,9 +296,11 @@ def interactive(args):
     
     print('Interactive mode. Press enter at a prompt to keep the current value.\n')
 
-    pattern = args.regex or ''
-    replacement = args.replacement or ''
-    filePatterns = list(args.files)
+    state = {
+        'pattern': args.regex or '',
+        'replacement': args.replacement or '',
+        'filePatterns': list(args.files)
+    }
 
     menu = """
 commands:
@@ -236,6 +318,19 @@ commands:
 """
     print(menu)
 
+    commands = {
+        'g': cmd_set_glob,
+        'r': cmd_set_regex,
+        's': cmd_set_replacement,
+        'f': cmd_list_files,
+        'v': cmd_validate_regex,
+        'm': cmd_show_matches,
+        'd': lambda args_text, state: cmd_replace(args_text, state, dry_run=True),
+        'w': lambda args_text, state: cmd_replace(args_text, state, dry_run=False),
+        'p': cmd_print_settings,
+        'ls': cmd_list_directory,
+    }
+
     while True:
         try:
             user_input = input('i-sed-no> ').strip()
@@ -247,63 +342,12 @@ commands:
         choice = parts[0].lower() if parts else ''
         args_text = parts[1] if len(parts) > 1 else None
 
-        if choice == 'g':
-            if args_text:
-                filePatterns = args_text.split()
-            else:
-                raw = prompt('file glob(s)', ' '.join(filePatterns))
-                filePatterns = raw.split()
-        elif choice == 'r':
-            if args_text:
-                pattern = args_text
-            else:
-                pattern = prompt('regex', pattern)
-        elif choice == 's':
-            if args_text:
-                replacement = args_text
-            else:
-                replacement = prompt('replacement', replacement)
-        elif choice == 'f':
-            if filePatterns:
-                do_list_files(filePatterns)
-            else:
-                print('set file glob(s) first (g)')
-        elif choice == 'v':
-            if pattern:
-                do_check_regex(pattern)
-            else:
-                print('set regex first (r)')
-        elif choice == 'm':
-            if pattern and filePatterns:
-                do_show_matches(pattern, filePatterns)
-            else:
-                print('set regex (r) and file glob(s) (g) first')
-        elif choice in ('d', 'w'):
-            if pattern and filePatterns:
-                do_replace(pattern, replacement, filePatterns, dry_run=(choice == 'd'))
-            else:
-                print('set regex (r) and file glob(s) (g) first')
-        elif choice == 'p':
-            print(f'  glob(s):     {" ".join(filePatterns) or "(unset)"}')
-            print(f'  regex:       {pattern or "(unset)"}')
-            print(f'  replacement: {replacement or "(unset)"}')
-        elif choice == 'ls':
-            files = sorted(p.name for p in Path.cwd().iterdir() if p.is_file())
-            dirs = sorted(p.name for p in Path.cwd().iterdir() if p.is_dir())
-            if dirs:
-                print('directories:')
-                for d in dirs:
-                    print(f'  {d}/')
-            if files:
-                print('files:')
-                for f in files:
-                    print(f'  {f}')
-            if not files and not dirs:
-                print('(empty directory)')
-        elif choice == 'q':
+        if choice == 'q':
             return 0
         elif choice in ('h', '?', 'help'):
             print(menu)
+        elif choice in commands:
+            commands[choice](args_text, state)
         elif choice:
             print(f'unknown command: {choice!r} (h for help)')
 
