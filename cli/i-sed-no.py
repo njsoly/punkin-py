@@ -37,6 +37,7 @@ This script, "I _sed_ no,", is a replacement for `sed` for me on the command-lin
 
 import argparse
 import glob
+import os
 import re
 import sys
 from collections import Counter
@@ -269,8 +270,16 @@ def cmd_print_settings(args_text, state):
 
 def cmd_list_directory(args_text, state):
     """Handle 'ls' command: list files in current directory."""
-    files = sorted(p.name for p in Path.cwd().iterdir() if p.is_file())
-    dirs = sorted(p.name for p in Path.cwd().iterdir() if p.is_dir())
+    cwd = Path.cwd()
+    home = Path.home()
+    try:
+        rel_cwd = f'~/{cwd.relative_to(home)}'
+    except ValueError:
+        rel_cwd = str(cwd)
+    print(f'Current directory: {rel_cwd}')
+    
+    files = sorted(p.name for p in cwd.iterdir() if p.is_file())
+    dirs = sorted(p.name for p in cwd.iterdir() if p.is_dir())
     if dirs:
         print('directories:')
         for d in dirs:
@@ -281,6 +290,38 @@ def cmd_list_directory(args_text, state):
             print(f'  {f}')
     if not files and not dirs:
         print('(empty directory)')
+
+
+def cmd_change_directory(args_text, state):
+    """Handle 'cd' command: change current directory."""
+    if args_text:
+        target = args_text
+    else:
+        target = prompt('directory', str(Path.cwd()))
+    
+    if not target:
+        return
+    
+    target_path = Path(target).expanduser().resolve()
+    
+    if not target_path.exists():
+        print(f'directory does not exist: {target}')
+        return
+    
+    if not target_path.is_dir():
+        print(f'not a directory: {target}')
+        return
+    
+    try:
+        os.chdir(target_path)
+        home = Path.home()
+        try:
+            rel_path = f'~/{target_path.relative_to(home)}'
+        except ValueError:
+            rel_path = str(target_path)
+        print(f'Changed to: {rel_path}')
+    except OSError as e:
+        print(f'failed to change directory: {e}')
 
 
 def interactive(args):
@@ -304,17 +345,18 @@ def interactive(args):
 
     menu = """
 commands:
-  g  set file glob(s) (space-separated)
-  r  set regex
-  s  set replacement string
-  f  dry run: list targeted files
-  v  dry run: validate regex
-  m  dry run: show matches
-  d  dry run: full command, no writes
-  w  WRITE replacements to files
-  p  print current settings
-  ls list files in current directory
-  q  quit
+  g   set file glob(s) (space-separated)
+  r   set regex
+  s   set replacement string
+  f   dry run: list targeted files
+  v   dry run: validate regex
+  m   dry run: show matches
+  d   dry run: full command, no writes
+  w   WRITE replacements to files
+  p   print current settings
+  ls  list files in current directory
+  cd  change directory
+  q   quit
 """
     print(menu)
 
@@ -329,6 +371,7 @@ commands:
         'w': lambda args_text, state: cmd_replace(args_text, state, dry_run=False),
         'p': cmd_print_settings,
         'ls': cmd_list_directory,
+        'cd': cmd_change_directory,
     }
 
     while True:
