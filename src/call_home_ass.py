@@ -4,7 +4,10 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
+
 DEFAULT_SECRETS_PATH: Path = Path.home() / ".config" / "home-ass.env"
+DEFAULT_HA_BASE_URL: str = "http://homeassistant.local:8123"
+
 
 # Load secrets from a file outside the repo (chmod 600).
 # Falls back to a local .env (gitignored) if the user-level one isn't there.
@@ -30,14 +33,15 @@ def get_basic_headers():
 
 
 load_env()
-BASE_URL = os.environ.get("HA_BASE_URL", "http://homeassistant.local:8123")
+BASE_URL = os.environ.get("HA_BASE_URL", DEFAULT_HA_BASE_URL)
 HEALTH_CHECK_URL = f"{BASE_URL}/api/"
 
-def check_if_running():
-    response = requests.get(HEALTH_CHECK_URL, headers=get_basic_headers(), timeout=10)
+
+def check_if_running() -> bool:
+    response = requests.get(HEALTH_CHECK_URL, headers = get_basic_headers(), timeout = 10)
     response.raise_for_status()
-    return response.json().get("message") == "API running.", response.text
+    return response.json().get("message") == "API running."
 
 
 if __name__ == "__main__":
-    print(check_if_running())
+    print("Is Home Assistant running: ", check_if_running())
