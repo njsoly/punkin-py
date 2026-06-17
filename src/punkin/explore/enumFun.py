@@ -1,7 +1,5 @@
-from enum import Enum
 import os
-import sys
-import ast
+from enum import Enum
 
 
 class Season(Enum):
@@ -18,5 +16,7 @@ class Season(Enum):
 
 
 if __name__ == "__main__":
-  print("os.path is " + os.path)
+  print(f"os.path is \n\t{'\n\t'.join(os.path.defpath.split(':'))}")
+  print()
   print("repr of Spring?: " + repr(Season.SPRING))
+  print()

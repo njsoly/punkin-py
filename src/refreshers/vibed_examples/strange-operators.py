@@ -95,7 +95,7 @@ print("\n=== Walrus := ===")
 # Classic use: read-and-test in a loop condition
 import io
 stream = io.StringIO("one\ntwo\nthree\n")
-while (line := stream.readline()):
+while line := stream.readline():
     print(f"got: {line.strip()}")
 
 # Avoids computing something twice:
