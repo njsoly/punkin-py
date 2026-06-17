@@ -1,0 +1,4 @@
+resources/linux.words
+resources/nws/hourlyForecast.json
+resources/paths.txt
+*.words
